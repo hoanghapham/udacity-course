@@ -22,7 +22,10 @@ def create_database():
     cur = conn.cursor()
     
     # create sparkify database with UTF8 encoding
+    print("Drop database sparkdifydb")
     cur.execute("DROP DATABASE IF EXISTS sparkifydb")
+
+    print("Create database sparkifydb")
     cur.execute("CREATE DATABASE sparkifydb WITH ENCODING 'utf8' TEMPLATE template0")
 
     # close connection to default database
@@ -32,7 +35,7 @@ def create_database():
     conn = psycopg2.connect(
         host=host, 
         port=port,
-        dbname="studentdb",
+        dbname="sparkifydb",
         user="student",
         password="student"
     )
@@ -46,6 +49,7 @@ def drop_tables(cur, conn):
     Drops each table using the queries in `drop_table_queries` list.
     """
     for query in drop_table_queries:
+        print(f"Execute {query}")
         cur.execute(query)
         conn.commit()
 
@@ -55,6 +59,7 @@ def create_tables(cur, conn):
     Creates each table using the queries in `create_table_queries` list. 
     """
     for query in create_table_queries:
+        print(f"Creating table...")
         cur.execute(query)
         conn.commit()
 
