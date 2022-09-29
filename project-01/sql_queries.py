@@ -70,7 +70,8 @@ user_table_insert = ("""
 song_table_insert = ("""insert into songs (song_id, title, artist_id, year, duration) values 
     (%s, %s, %s, %s, %s)""")
 
-artist_table_insert = ("""
+artist_table_insert = ("""insert into artists (artist_id, name, location, latitude, longitude) values
+    (%s, %s, %s, %s, %s)
 """)
 
 
