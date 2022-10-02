@@ -4,7 +4,9 @@ In this project, we will model the data of a fictional music-streaming service c
 
 Diagram for the final model:
 
-<iframe width="560" height="315" src='https://dbdiagram.io/embed/633314907b3d2034ffcc20e5'> </iframe>
+https://dbdiagram.io/embed/633314907b3d2034ffcc20e5
+
+![](udacity-project-01.png)
 
 ## Preparation
 
