@@ -2,62 +2,105 @@ import os
 import glob
 import psycopg2
 import pandas as pd
-from sql_queries import *
+import sql_queries as queries
 
 
 def process_song_file(cur, filepath):
     # open song file
-    df = 
+    df = pd.read_json(filepath, lines=True)
 
     # insert song record
-    song_data = 
-    cur.execute(song_table_insert, song_data)
+    song_data = df[['song_id', 'title', 'artist_id', 'year', 'duration']].drop_duplicates()
+
+    for idx, row in song_data.iterrows():
+        try:
+            cur.execute(queries.song_table_insert, row)
+        except Exception as e:
+            raise e
     
     # insert artist record
-    artist_data = 
-    cur.execute(artist_table_insert, artist_data)
+    artist_data = df[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']].drop_duplicates()
+    for idx, row in artist_data.iterrows():
+        try:
+            cur.execute(queries.artist_table_insert, row)
+        except Exception as e:
+            raise e
 
 
 def process_log_file(cur, filepath):
     # open log file
-    df = 
+    log_df = pd.read_json(filepath, lines=True)
 
     # filter by NextSong action
-    df = 
+    time_df = log_df.loc[log_df.page == 'NextSong']
 
     # convert timestamp column to datetime
-    t = 
+    t = pd.to_datetime(log_df.ts, unit='ms')
     
     # insert time data records
-    time_data = 
-    column_labels = 
-    time_df = 
+    time_data = zip(
+        t, 
+        t.dt.hour, 
+        t.dt.day, 
+        t.dt.isocalendar().week, 
+        t.dt.month, 
+        t.dt.year, 
+        t.dt.weekday
+    )
+    column_labels = ('start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday') 
+    time_df = pd.DataFrame(time_data, columns=column_labels)
+
 
     for i, row in time_df.iterrows():
-        cur.execute(time_table_insert, list(row))
+        cur.execute(queries.time_table_insert, list(row))
 
     # load user table
-    user_df = 
+    user_df_base = log_df[['userId', 'firstName', 'lastName', 'gender', 'level', 'ts']].drop_duplicates()
+    user_df = user_df_base \
+        .groupby(['userId', 'firstName', 'lastName', 'gender', 'level']) \
+        .max('ts') \
+        .sort_values(['userId', 'ts']) \
+        .reset_index()
 
     # insert user records
     for i, row in user_df.iterrows():
-        cur.execute(user_table_insert, row)
+        insert_values = (
+            row.userId, 
+            row.firstName, 
+            row.lastName, 
+            row.gender, 
+            row.level
+        )
+        cur.execute(queries.user_table_insert, insert_values)
 
     # insert songplay records
-    for index, row in df.iterrows():
+    for index, row in log_df.iterrows():
         
         # get songid and artistid from song and artist tables
-        cur.execute(song_select, (row.song, row.artist, row.length))
+        cur.execute(queries.song_select, (row.song, row.artist, row.length))
         results = cur.fetchone()
         
         if results:
             songid, artistid = results
+            print(songid, artistid)
         else:
             songid, artistid = None, None
+            # print("song and artist not found")
 
         # insert songplay record
-        songplay_data = 
-        cur.execute(songplay_table_insert, songplay_data)
+        songplay_data = (
+            pd.to_datetime(row.ts, unit='ms'), 
+            row.userId, 
+            row.level,
+            songid,
+            row.song,
+            artistid,
+            row.artist,
+            row.sessionId,
+            row.location,
+            row.userAgent
+        )
+        cur.execute(queries.songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
@@ -80,7 +123,16 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
-    conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=student password=student")
+    host = "127.0.0.1"
+    port = "6543"
+
+    conn = psycopg2.connect(
+        host=host,
+        port=port,
+        dbname="sparkifydb", 
+        user="student",
+        password="student"
+    )
     cur = conn.cursor()
 
     process_data(cur, conn, filepath='data/song_data', func=process_song_file)

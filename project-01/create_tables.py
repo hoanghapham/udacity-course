@@ -26,7 +26,7 @@ def create_database():
     cur.execute("DROP DATABASE IF EXISTS sparkifydb")
 
     print("Create database sparkifydb")
-    cur.execute("CREATE DATABASE sparkifydb WITH ENCODING 'utf8' TEMPLATE template0")
+    cur.execute("CREATE DATABASE sparkifydb WITH ENCODING 'utf8' TEMPLATE template0 owner student;")
 
     # close connection to default database
     conn.close()    

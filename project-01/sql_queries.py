@@ -9,12 +9,14 @@ time_table_drop = "drop table if exists time"
 # CREATE TABLES
 
 songplay_table_create = ("""create table if not exists songplays (
-        songplay_id integer primary key,
+        songplay_id serial primary key,
         start_time timestamp,
         user_id integer,
         level text,
         song_id text,
+        song_title text,
         artist_id text,
+        artist_name text,
         session_id integer,
         location text,
         user_agent text
@@ -61,10 +63,32 @@ time_table_create = ("""create table if not exists time (
 
 # INSERT RECORDS
 
-songplay_table_insert = ("""
+songplay_table_insert = ("""insert into 
+    songplays (
+        start_time
+        , user_id
+        , level
+        , song_id
+        , song_title
+        , artist_id
+        , artist_name
+        , session_id
+        , location
+        , user_agent
+    )
+    values 
+    (%s, nullif(%s::text, '')::int, %s, %s, %s, %s, %s, %s, %s, %s)
 """)
 
-user_table_insert = ("""
+user_table_insert = ("""insert into users (user_id, first_name, last_name, gender, level) values 
+    (%s, %s, %s, %s, %s)
+on conflict (user_id)
+do update
+set 
+    first_name = excluded.user_id,
+    last_name = excluded.last_name,
+    gender = excluded.gender,
+    level = excluded.level;
 """)
 
 song_table_insert = ("""insert into songs (song_id, title, artist_id, year, duration) values 
@@ -72,15 +96,32 @@ song_table_insert = ("""insert into songs (song_id, title, artist_id, year, dura
 
 artist_table_insert = ("""insert into artists (artist_id, name, location, latitude, longitude) values
     (%s, %s, %s, %s, %s)
+on conflict (artist_id)
+do update 
+set 
+    artist_id = excluded.artist_id, 
+    name = excluded.name, 
+    location = excluded.location, 
+    latitude = excluded.latitude, 
+    longitude = excluded.longitude
 """)
 
 
-time_table_insert = ("""
+time_table_insert = ("""insert into time (start_time, hour, day, week, month, year, weekday) values
+    (%s, %s, %s, %s, %s, %s, %s)
 """)
 
 # FIND SONGS
 
 song_select = ("""
+    select 
+        songs.song_id, 
+        songs.artist_id 
+    from songs
+    left join artists on songs.artist_id = artists.artist_id
+    where songs.title = %s 
+        and artists.name = %s
+        and songs.duration = %s
 """)
 
 # QUERY LISTS
