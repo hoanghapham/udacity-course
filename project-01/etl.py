@@ -6,6 +6,15 @@ import sql_queries as queries
 
 
 def process_song_file(cur, filepath):
+    """Read in song file, and then insert data to `songs` and `artists` tables
+
+    Parameters
+    ----------
+    cur : psycopg2.extensions.cursor
+        Cursor object created from a PostgreSQL connection
+    filepath : str
+        Path to the song file.
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
 
@@ -28,6 +37,15 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
+    """Load log file, and then insert data to `time`, `users` and `songplays` tables.
+
+    Parameters
+    ----------
+    cur : psycopg2.extensions.cursor
+        Cursor object created from a PostgreSQL connection
+    filepath : str
+        Path to the log file.
+    """
     # open log file
     log_df = pd.read_json(filepath, lines=True)
 
@@ -55,6 +73,10 @@ def process_log_file(cur, filepath):
         cur.execute(queries.time_table_insert, list(row))
 
     # load user table
+    # When the user changes their information, there will be multiple rows for one userId.
+    # In that case, use the latest info to update the user's record.
+    # This logic is handled in sql_queries.user_table_insert
+
     user_df_base = log_df[['userId', 'firstName', 'lastName', 'gender', 'level', 'ts']].drop_duplicates()
     user_df = user_df_base \
         .groupby(['userId', 'firstName', 'lastName', 'gender', 'level']) \
@@ -100,6 +122,20 @@ def process_log_file(cur, filepath):
 
 
 def process_data(cur, conn, filepath, func):
+    """Generic function serves as the interface to call different 
+    data processing functions.
+
+    Parameters
+    ----------
+    cur : psycopg2.extensions.cursor
+        Cursor object created from a PostgreSQL connection
+    conn : psycopg2.extensions.connection
+        Connection object created from psycopg2
+    filepath : str
+        Path to the file to be processed
+    func : function
+        A data processing function
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
