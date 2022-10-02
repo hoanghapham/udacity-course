@@ -88,7 +88,16 @@ set
 """)
 
 song_table_insert = ("""insert into songs (song_id, title, artist_id, year, duration) values 
-    (%s, %s, %s, %s, %s)""")
+    (%s, %s, %s, %s, %s)
+on conflict (song_id)
+do update
+set     
+    title = excluded.title,
+    artist_id = excluded.artist_id,
+    year = excluded.year,
+    duration = excluded.duration
+""")
+    
 
 artist_table_insert = ("""insert into artists (artist_id, name, location, latitude, longitude) values
     (%s, %s, %s, %s, %s)
