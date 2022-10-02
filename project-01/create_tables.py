@@ -2,7 +2,7 @@ import psycopg2
 from sql_queries import create_table_queries, drop_table_queries
 
 host = "127.0.0.1"
-port = "6543"
+port = "5432"
 
 def create_database():
     """

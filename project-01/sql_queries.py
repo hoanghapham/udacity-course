@@ -14,9 +14,7 @@ songplay_table_create = ("""create table if not exists songplays (
         user_id integer,
         level text,
         song_id text,
-        song_title text,
         artist_id text,
-        artist_name text,
         session_id integer,
         location text,
         user_agent text
@@ -37,7 +35,7 @@ song_table_create = ("""create table if not exists songs (
         title text,
         artist_id text,
         year integer,
-        duration integer
+        duration float
     )
 """)
 
@@ -69,15 +67,13 @@ songplay_table_insert = ("""insert into
         , user_id
         , level
         , song_id
-        , song_title
         , artist_id
-        , artist_name
         , session_id
         , location
         , user_agent
     )
     values 
-    (%s, nullif(%s::text, '')::int, %s, %s, %s, %s, %s, %s, %s, %s)
+    (%s, nullif(%s::text, '')::int, %s, %s, %s, %s, %s, %s)
 """)
 
 user_table_insert = ("""insert into users (user_id, first_name, last_name, gender, level) values 
@@ -119,7 +115,7 @@ song_select = ("""
         songs.artist_id 
     from songs
     left join artists on songs.artist_id = artists.artist_id
-    where songs.title = %s 
+    where songs.title = %s
         and artists.name = %s
         and songs.duration = %s
 """)

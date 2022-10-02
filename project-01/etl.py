@@ -82,10 +82,8 @@ def process_log_file(cur, filepath):
         
         if results:
             songid, artistid = results
-            print(songid, artistid)
         else:
             songid, artistid = None, None
-            # print("song and artist not found")
 
         # insert songplay record
         songplay_data = (
@@ -93,9 +91,7 @@ def process_log_file(cur, filepath):
             row.userId, 
             row.level,
             songid,
-            row.song,
             artistid,
-            row.artist,
             row.sessionId,
             row.location,
             row.userAgent
@@ -124,7 +120,7 @@ def process_data(cur, conn, filepath, func):
 
 def main():
     host = "127.0.0.1"
-    port = "6543"
+    port = "5432"
 
     conn = psycopg2.connect(
         host=host,
