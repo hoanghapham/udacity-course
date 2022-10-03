@@ -63,6 +63,8 @@ On PopOS, you may encounter this error: `python-build: line xxx: xxxx Segmentati
 sudo apt install clang -y;
 CC=clang pyenv install 3.6.3;
 ```
+(Reference: https://github.com/pyenv/pyenv/issues/2239)
+
 
 Then cd in to the project folder, run
 ```bash
