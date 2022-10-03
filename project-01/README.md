@@ -43,7 +43,33 @@ The `create_tables.py` script provided by Udacity will first connect to a defaul
 
 And now you are done.
 
-## Package package dependencies
+## Dependencies
+This project is written to be run in Udacity's environment which requires:
+- Python 3.6.3
+- psycopg2-binary 2.7.4
+- pandas 0.23.3
+
+If you do not have Python 3.6.3, you should install it via pyenv.
+
+Assuming that you already have pyenv installed, run the following:
+
+```bash
+pyenv install 3.6.3
+```
+
+On PopOS, you may encounter this error: `python-build: line xxx: xxxx Segmentation fault`. If that's the case, run the following:
+
+```bash
+sudo apt install clang -y;
+CC=clang pyenv install 3.6.3;
+```
+
+Then cd in to the project folder, run
+```bash
+pyenv local 3.6.3
+```
+to set the project folder's python version to Python 3.6.3
+
 To install required packages:
 ```bash
 pip3 install -r requirements.txt;

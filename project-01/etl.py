@@ -56,15 +56,15 @@ def process_log_file(cur, filepath):
     t = pd.to_datetime(log_df.ts, unit='ms')
     
     # insert time data records
-    time_data = zip(
+    time_data = list(zip(
         t, 
         t.dt.hour, 
         t.dt.day, 
-        t.dt.isocalendar().week, 
+        t.dt.week, 
         t.dt.month, 
         t.dt.year, 
         t.dt.weekday
-    )
+    ))
     column_labels = ('start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday') 
     time_df = pd.DataFrame(time_data, columns=column_labels)
 
@@ -80,7 +80,7 @@ def process_log_file(cur, filepath):
     user_df_base = log_df[['userId', 'firstName', 'lastName', 'gender', 'level', 'ts']].drop_duplicates()
     user_df = user_df_base \
         .groupby(['userId', 'firstName', 'lastName', 'gender', 'level']) \
-        .max('ts') \
+        .max() \
         .sort_values(['userId', 'ts']) \
         .reset_index()
 
