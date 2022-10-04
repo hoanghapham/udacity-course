@@ -49,7 +49,7 @@ artist_table_create = ("""create table if not exists artists (
 """)
 
 time_table_create = ("""create table if not exists time (
-        start_time timestamp,
+        start_time timestamp primary key,
         hour integer,
         day integer,
         week integer,
@@ -90,30 +90,21 @@ set
 song_table_insert = ("""insert into songs (song_id, title, artist_id, year, duration) values 
     (%s, %s, %s, %s, %s)
 on conflict (song_id)
-do update
-set     
-    title = excluded.title,
-    artist_id = excluded.artist_id,
-    year = excluded.year,
-    duration = excluded.duration
+do nothing
 """)
     
 
 artist_table_insert = ("""insert into artists (artist_id, name, location, latitude, longitude) values
     (%s, %s, %s, %s, %s)
 on conflict (artist_id)
-do update 
-set 
-    artist_id = excluded.artist_id, 
-    name = excluded.name, 
-    location = excluded.location, 
-    latitude = excluded.latitude, 
-    longitude = excluded.longitude
+do nothing
 """)
 
 
 time_table_insert = ("""insert into time (start_time, hour, day, week, month, year, weekday) values
     (%s, %s, %s, %s, %s, %s, %s)
+on conflict (start_time)
+do nothing
 """)
 
 # FIND SONGS
