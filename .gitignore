@@ -1,6 +1,7 @@
 /**/vm/.vagrant
 /**/.python-version
 /**/credentials
+tmp/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
