@@ -27,8 +27,11 @@ def row_process(row):
     return new_row
 #%%
 
-input = "s3://hapham/cities.csv"
-output = "s3://hapham/new_cities.csv"
+# input = "s3://hapham/cities.csv"
+# output = "s3://hapham/new_cities.csv"
+
+input = 'cities.csv'
+output = 'new_cities.csv'
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser()
@@ -57,4 +60,7 @@ if __name__ == '__main__':
     )
 
     new_cities.write.option("header", "true").csv(output)
+    print(f"Wrote file to {output}")
+
+    spark.stop()
 
