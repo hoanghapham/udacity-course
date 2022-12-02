@@ -28,7 +28,7 @@ def row_process(row):
 #%%
 
 input = "s3://hapham/cities.csv"
-output = "s3://hapham/new_cities.csv"
+output = "s3://hapham/new_cities"
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser()
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     spark = SparkSession.builder.appName("Process cities").getOrCreate()
 
-    cities = spark.read.option("header", 'true').csv(input)
+    cities = spark.read.option('header', 'true').csv(input)
 
     cities.createOrReplaceTempView('cities')
 
@@ -56,5 +56,5 @@ if __name__ == '__main__':
     """
     )
 
-    new_cities.write.option("header", "true").csv(output)
+    new_cities.write.option('header', 'true').csv(output)
 
