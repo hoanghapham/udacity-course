@@ -56,5 +56,8 @@ if __name__ == '__main__':
     """
     )
 
-    new_cities.write.option('header', 'true').csv(output)
+    new_cities.write.option("header", "true").csv(output)
+    print(f"Wrote file to {output}")
+
+    spark.stop()
 
