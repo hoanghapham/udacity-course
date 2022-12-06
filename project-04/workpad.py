@@ -55,5 +55,11 @@ song_df = spark.read.json(song_files)
 song_tbl = song_df.select('song_id', 'title', 'artist_id', 'year', 'duration')
 
 # %%
-song_tbl.write.parquet(project_folder + '/tables/songs.parquet')
+song_tbl.write.parquet(project_folder + "/tables/songs.parquet")
+# %%
+
+artist_tbl = song_df.select('artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude')
+
+# %%
+artist_tbl.write.parquet(project_folder + "/tables/artists.parquet")
 # %%
