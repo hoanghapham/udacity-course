@@ -3,7 +3,8 @@ from datetime import datetime
 
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import udf, col
+from pyspark.sql.window import Window
+from pyspark.sql.functions import udf, col, row_number
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format, monotonically_increasing_id
 from pyspark.sql.types import TimestampType
 from pyspark import SparkConf
@@ -29,10 +30,10 @@ def create_spark_session():
 
 def config_spark_session(cred):
     conf = SparkConf()
-    conf.set('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider')
-    conf.set('spark.hadoop.fs.s3a.access.key', cred["AWS"]["AWS_ACCESS_KEY_ID"])
-    conf.set('spark.hadoop.fs.s3a.secret.key', cred["AWS"]["AWS_SECRET_ACCESS_KEY"])
-    conf.set('spark.hadoop.fs.s3a.session.token', cred["AWS"]['AWS_SESSION_TOKEN'])
+    conf.set("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider")
+    conf.set("spark.hadoop.fs.s3a.access.key", cred["AWS"]["AWS_ACCESS_KEY_ID"])
+    conf.set("spark.hadoop.fs.s3a.secret.key", cred["AWS"]["AWS_SECRET_ACCESS_KEY"])
+    conf.set("spark.hadoop.fs.s3a.session.token", cred["AWS"]["AWS_SESSION_TOKEN"])
 
     return conf
 
@@ -58,8 +59,15 @@ def generate_songs_data(data: DataFrame) -> DataFrame:
     DataFrame
         A DataFrame containing only songs data
     """
-    logger.info('Process songs data...')
-    output = data.select("song_id", "title", "artist_id", "year", "duration")
+    logger.info("Process songs data...")
+
+    # Use row_number() with partition on song_id to select the latest info of the song
+    song_id_partition = Window.partitionBy("song_id").orderBy("song_id")
+
+    output = data.select("song_id", "title", "artist_id", "year", "duration") \
+        .withColumn("idx", row_number().over(song_id_partition)) \
+        .filter(col("idx") == 1) \
+        .drop("idx")
 
     return output
     
@@ -77,36 +85,48 @@ def generate_artists_data(data: DataFrame) -> DataFrame:
     DataFrame
         A DataFrame containing only artists data
     """
-    logger.info('Process artists data...')
-    output = data.select("artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude")
-    
+    logger.info("Process artists data...")
+
+    # Use row_number() with partition on artist_id to select the latest info of the artist
+    artist_id_partition = Window.partitionBy("artist_id").orderBy("artist_id")
+
+    output = data.select("artist_id", "artist_name", "artist_location", "artist_latitude", "artist_longitude") \
+        .withColumn("idx", row_number().over(artist_id_partition)) \
+        .filter(col("idx") == 1) \
+        .drop("idx")
+
     return output
 
 
 def generate_users_data(data: DataFrame) -> DataFrame:
-    """Extract users data from the source song dataframe
+    """Extract users data from the source log dataframe
 
     Parameters
     ----------
     data : DataFrame
-        The source song dataframe
+        The source log dataframe
 
     Returns
     -------
     DataFrame
         A DataFrame containing only users data
     """    
-    logger.info('Process users data...')
+    logger.info("Process users data...")
+
+    # Use row_number() partition by user_id to select the latest information of users
+    user_id_partition = Window.partitionBy("user_id").orderBy(col("ts").desc())
+    
     output = data \
-        .select("userId", "firstName", "lastName", "gender", "level") \
+        .select("userId", "firstName", "lastName", "gender", "level", "ts") \
         .withColumnRenamed("userId", "user_id") \
         .withColumnRenamed("firstName", "first_name") \
         .withColumnRenamed("lastName", "last_name") \
-        .dropDuplicates()
+        .withColumn("idx", row_number().over(user_id_partition)) \
+        .filter(col("idx") == 1) \
+        .drop("idx", "ts")
     
     return output
-    
-    
+
 
 def generate_time_data(data: DataFrame) -> DataFrame:
     """Extract time data from the source log dataframe
@@ -121,8 +141,11 @@ def generate_time_data(data: DataFrame) -> DataFrame:
     DataFrame
         A DataFrame containing only time data
     """    
-    logger.info('Process time data...')
+    logger.info("Process time data...")
+    
+    # Timestamp can be deduplicated using dropDuplicates() 
     output = data.select("ts") \
+        .dropDuplicates() \
         .withColumn("start_time", udf_to_timestamp(col("ts"))) \
         .withColumn("hour", hour(col("start_time"))) \
         .withColumn("day", dayofmonth(col("start_time"))) \
@@ -208,7 +231,7 @@ def generate_songplays_data(
 
 def write_songs_table(data: DataFrame, output_path: str):
     logger.info("Writing to songs table...")
-    data.write.parquet(output_path + "songs.parquet", mode = "overwrite")
+    data.write.partitionBy("year", "artist_id").parquet(output_path + "songs.parquet", mode = "overwrite")
 
 def write_artists_table(data: DataFrame, output_path: str):
     logger.info("Writing to artists table...")
