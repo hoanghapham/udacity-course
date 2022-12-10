@@ -1,1 +1,1 @@
-sagemaker-pyspark==1.4.1
+pyspark==3.3.1

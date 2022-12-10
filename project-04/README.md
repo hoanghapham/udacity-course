@@ -2,6 +2,7 @@
 
 In this project, we will build a data lake structure for a fictional music-streaming service called Sparkify. 
 
+
 ## Architecture
 
 ![](./images/AWS-EMR-Spark-S3.png)
@@ -10,11 +11,13 @@ Diagram for the final model:
 
 ![](./images/udacity-project-03.png)
 
+
 ## Model optimization
 
 In the model, a few optimization practices were applied:
 - `songplays` table: partition by `year` and `month`, because this is a very large table, and typically when querying fact tables like this, users will want to filter by time period.
 - `time` table: partition by `year` and `month`
+
 
 ## Requirements
 
@@ -23,12 +26,14 @@ In the model, a few optimization practices were applied:
 - Credentials to access S3 data: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
 - Python 3.7.14
 - [pyenv](https://github.com/pyenv/pyenv#installation) to manage python version & virtual environment
+- [Java](https://docs.oracle.com/cd/E19509-01/820-3208/inst_cli_jdk_javahome_t/) is also needed to run spark. Please follow the official guide to install Java and set JAVA_HOME variable.
 
 
 ## Installation
 
 - `make install-aws-cli`: Install the AWS CLI if you don't have it
 - `make prepare-environment`: Install Python 3.7.14 using `pyenv`, set the local folder's python version, and install other required packages to this version's environment.
+
 
 ## Configurations:
 
@@ -47,7 +52,7 @@ In the model, a few optimization practices were applied:
 
 ### Run locally
 1. `make prepare-environment`: to prepare the local environment
-2. Update the `configs/config.cfg` file with the path to your local data
+2. Update the `configs/config.cfg` file with the paths to your local data
 3. `make build-etl-dependencies` to build the dependency zip file for the ETL job
 4. `make run-etl` to run the ETL job
 
