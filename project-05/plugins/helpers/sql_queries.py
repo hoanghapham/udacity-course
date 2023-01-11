@@ -1,4 +1,4 @@
-class SqlQueries:
+class InsertQueries:
     songplay_table_insert = ("""
         SELECT
                 md5(events.sessionid || events.start_time) songplay_id,
@@ -40,3 +40,25 @@ class SqlQueries:
                extract(month from start_time), extract(year from start_time), extract(dayofweek from start_time)
         FROM songplays
     """)
+
+class StageQueries:
+    staging_events_copy = ("""
+        COPY staging.events
+        FROM '{source_data}'
+        CREDENTIALS 'aws_iam_role={aws_iam_role}'
+        FORMAT AS JSON '{log_jsonpath}'
+        """)
+
+    staging_songs_copy = ("""
+        COPY staging.songs
+        FROM '{source_data}'
+        CREDENTIALS 'aws_iam_role={aws_iam_role}'
+        FORMAT AS JSON 'auto'
+        """)
+
+    stage_table = """
+        COPY staging.{table}
+        FROM '{source_data}'
+        CREDENTIALS 'aws_iam_role={aws_iam_role}'
+        FORMAT AS JSON 'auto'
+    """

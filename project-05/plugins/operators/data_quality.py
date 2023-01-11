@@ -20,3 +20,8 @@ class DataQualityOperator(BaseOperator):
 
     def execute(self, context):
         self.log.info('DataQualityOperator not implemented yet')
+
+        # test cases
+        # Unique
+        # Not null
+        # Has data
