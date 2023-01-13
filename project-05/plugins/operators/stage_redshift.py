@@ -13,33 +13,37 @@ class StageToRedshiftOperator(BaseOperator):
     def __init__(self,
                  # Define your operators params (with defaults) here
                  # Example:
-                 # redshift_conn_id=your-connection-name
+                 source_data='',
+                 redshift_conn_id = 'redshift',
+                 table = '',
+                 aws_credentials_id = 'aws_credentials',
                  *args, **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
-        # Map params here
-        # Example:
-        # self.conn_id = conn_id
-        self.table = table
-        self.redshift_conn_id = redshift_conn_id
-        self.s3_bucket = s3_bucket
-        self.s3_key = s3_key
-        self.delimiter = delimiter
-        self.ignore_headers = ignore_headers
+        
+        self.source_data = source_data
         self.aws_credentials_id = aws_credentials_id
+
+        self.redshift_conn_id = redshift_conn_id
+        self.table = table
 
     def execute(self, context):
         # self.log.info('StageToRedshiftOperator not implemented yet')
+
         aws_hook = AwsHook(self.aws_credentials_id)
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        self.log.info(f"Staging {table}...")
+        self.log.info(f"Staging {self.table}...")
 
         redshift.run("DELETE FROM {}".format(self.table))
 
-
-        redshift.run(StageQueries.stage_table.format(table=table, source_data=source_data, aws_iam_role=aws_iam_role))
+        redshift.run(
+            StageQueries.stage_table.format(
+                table=self.table, 
+                source_data=self.source_data, 
+                aws_iam_role=self.aws_credentials_id)
+        )
 
 
 
