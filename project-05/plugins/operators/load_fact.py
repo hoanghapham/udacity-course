@@ -2,7 +2,10 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
-from plugins.helpers.sql_queries import InsertQueries
+from helpers.custom_logger import init_logger
+from helpers.sql_queries import LoadConfig
+
+logger = init_logger(__file__)
 
 class LoadFactOperator(BaseOperator):
 
@@ -11,31 +14,21 @@ class LoadFactOperator(BaseOperator):
     @apply_defaults
     def __init__(
         self,
-        aws_credentials_id='',
-        redshift_conn_id='redshift',
-        query=''
+        redshift_conn_id="",
+        load_config: LoadConfig = None,
         *args, **kwargs):
 
         super(LoadFactOperator, self).__init__(*args, **kwargs)
-        self.aws_credentials_id = aws_credentials_id
-
         self.redshift_conn_id = redshift_conn_id
-        self.query = query
-
+        self.load_config = load_config
 
     def execute(self, context):
-        # self.log.info('LoadFactOperator not implemented yet')
-        aws_hook = AwsHook(self.aws_credentials_id)
-        credentials = aws_hook.get_credentials()
-        redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
-
-
-        redshift.run(
-            InsertQueries.stage_table.format(
-                table=self.table, 
-                source_data=self.source_data, 
-                aws_iam_role=self.aws_credentials_id)
-        )
+        redshift = PostgresHook(self.redshift_conn_id)
+        
+        logger.info(f"Loading fact table {self.load_config.table_name}...")
+        
+        redshift.run(self.load_config.create_table)
+        redshift.run(self.load_config.insert_table)
 
 
 

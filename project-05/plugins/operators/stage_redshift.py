@@ -2,7 +2,9 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
-from airflow.hooks.postgres_hook import PostgresHook
+from airflow.operators import PostgresOperator
+
+import logging
 
 from helpers.sql_queries import StageQueries
 
@@ -12,22 +14,19 @@ class StageToRedshiftOperator(BaseOperator):
     @apply_defaults
     def __init__(
         self,
-        s3_bucket='',
-        s3_key='',
+        s3_path = '',
         redshift_conn_id = 'redshift',
-        table = '',
+        load_config = None,
         aws_credentials_id = 'aws_credentials',
         *args, **kwargs
     ):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
         
-        self.s3_bucket = s3_bucket
-        self.s3_key = s3_key
+        self.s3_path = s3_path
         self.aws_credentials_id = aws_credentials_id
-
         self.redshift_conn_id = redshift_conn_id
-        self.table = table
+        self.load_config = load_config
 
     def execute(self, context):
 
@@ -35,21 +34,12 @@ class StageToRedshiftOperator(BaseOperator):
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        self.log.info("Clearing data from destination Redshift table")
-        redshift.run("DELETE FROM {}".format(self.table))
+        logging.info(f"Staging {self.load_config.table_name}...")
 
-        self.log.info(f"Staging {self.table}...")     
-        rendered_key = self.s3_key.format(**context)
-        s3_path = "s3://{}/{}".format(self.s3_bucket, rendered_key)
+        redshift.run(self.load_config.create_table)
+        redshift.run(self.load_config.insert_table.format(
+            access_key=credentials.access_key, secret_key=credentials.secret_key))
 
-        formatted_sql = StageQueries.stage_table.format(
-                table=self.table, 
-                s3_path=s3_path,
-                access_key=credentials.access_key,
-                secret_key=credentials.secret_key
-        )
-        
-        redshift.run(formatted_sql)
 
 
 
