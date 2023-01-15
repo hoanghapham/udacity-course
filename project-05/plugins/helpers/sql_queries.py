@@ -44,8 +44,9 @@ class InsertQueries:
 class StageQueries:
     stage_table = """
         COPY staging.{table}
-        FROM '{source_data}'
-        CREDENTIALS 'aws_iam_role={aws_iam_role}'
+        FROM '{s3_path}'
+        ACCESS_KEY_ID '{access_key}'
+        SECRET_ACCESS_KEY '{secret_key}'
         FORMAT AS JSON 'auto'
     """
 
