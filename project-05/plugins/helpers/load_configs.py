@@ -148,30 +148,6 @@ CREATE TABLE public.users (
 );
 """
 
-class DataQualityQueries:
-    check_unique_sql = """
-        sellect
-            {column},
-            count(*) as cnt
-        from {table}
-        group by 1
-        having cnt > 1
-    """
-
-    check_not_null_sql = """
-        select
-            count(case when {column} is null then 1 else null end) as cnt
-        from {table}
-        having cnt > 0
-    """
-
-    check_has_data = """
-        select 
-            count(*) as cnt
-        from {table}
-        having cnt > 0
-    """
-
 copy_staging_events_table = """
     COPY public.staging_events
     FROM 's3://udacity-dend/log_data'
@@ -235,3 +211,8 @@ class LoadTimeDimTable(LoadConfig):
     table_name = 'time'
     create_table = create_time_table
     insert_table = insert_time_table
+
+class LoadSongplaysFactTable(LoadConfig):
+    table_name = 'songplays'
+    create_table = create_songplays_table
+    insert_table = insert_songplays_table

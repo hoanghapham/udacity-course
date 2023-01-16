@@ -1,11 +1,14 @@
 /**/vm/.vagrant
-/**/.python-version
 /**/credentials
 tmp/
 aws
 notebooks
 **/data/*
 **/tables/*
+airflow
+redshift
+
+.python-version
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python

@@ -16,8 +16,8 @@ class StageToRedshiftOperator(BaseOperator):
         self,
         s3_path = '',
         redshift_conn_id = 'redshift',
-        load_config = None,
         aws_credentials_id = 'aws_credentials',
+        load_config = None,
         *args, **kwargs
     ):
 

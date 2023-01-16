@@ -4,7 +4,16 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
                                 LoadDimensionOperator, DataQualityOperator)
-from helpers import SqlQueries
+
+from plugins.helpers.sql_queries import (
+    StageEventsTable,
+    StageSongsTable,
+    LoadArtistsDimTable,
+    LoadSongsDimTable,
+    LoadUsersDimTable,
+    LoadTimeDimTable,
+    LoadSongplaysFactTable
+)
 
 # AWS_KEY = os.environ.get('AWS_KEY')
 # AWS_SECRET = os.environ.get('AWS_SECRET')
@@ -25,49 +34,60 @@ start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 stage_logs_to_redshift = StageToRedshiftOperator(
     task_id='Stage_logs',
     dag=dag,
-    source_data='s3://udacity-dend/log_data',
-    aws_credentials_id='aws_credentials',
+    s3_path='s3://udacity-dend/log_data',
     redshift_conn_id='redshift',
-    table='logs'
+    aws_credentials_id='aws_credentials',
+    load_config=StageEventsTable
 )
 
 stage_songs_to_redshift = StageToRedshiftOperator(
     task_id='Stage_songs',
     dag=dag,
-    source_data='s3://udacity-dend/song_data',
-    aws_credentials_id='aws_credentials',
+    s3_path='s3://udacity-dend/song_data',
     redshift_conn_id='redshift',
-    table='songs'
+    aws_credentials_id='aws_credentials',
+    load_config=StageSongsTable
 )
 
 load_songplays_table = LoadFactOperator(
     task_id='Load_songplays_fact_table',
-    dag=dag
+    dag=dag,
+    redshift_conn_id='redshift',
+    load_config=LoadSongplaysFactTable
 )
 
 load_user_dimension_table = LoadDimensionOperator(
-    task_id='Load_user_dim_table',
-    dag=dag
+    task_id='Load_users_dim_table',
+    dag=dag,
+    redshift_conn_id='redshift',
+    load_config=LoadUsersDimTable
 )
 
-load_song_dimension_table = LoadDimensionOperator(
-    task_id='Load_song_dim_table',
-    dag=dag
+load_songs_dimension_table = LoadDimensionOperator(
+    task_id='Load_songs_dim_table',
+    dag=dag,
+    redshift_conn_id='redshift',
+    load_config=LoadSongsDimTable
 )
 
-load_artist_dimension_table = LoadDimensionOperator(
-    task_id='Load_artist_dim_table',
-    dag=dag
+load_artists_dimension_table = LoadDimensionOperator(
+    task_id='Load_artists_dim_table',
+    dag=dag,
+    redshift_conn_id='redshift',
+    load_config=LoadArtistsDimTable
 )
 
 load_time_dimension_table = LoadDimensionOperator(
     task_id='Load_time_dim_table',
-    dag=dag
+    dag=dag,
+    redshift_conn_id='redshift',
+    load_config=LoadTimeDimTable
 )
 
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
-    dag=dag
+    dag=dag,
+    
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
