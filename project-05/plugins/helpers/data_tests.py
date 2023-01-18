@@ -1,6 +1,6 @@
 
 check_unique_sql = """
-    sellect
+    select
         {column},
         count(*) as cnt
     from {table}
