@@ -30,7 +30,7 @@ class DataTest:
     
     def execute(self):
         records = self.redshift_hook.get_records(self.sql)
-        if len(records) > 0 or len(records[0] > 0):
+        if len(records) > 0:
             return 'failed'
         else:
             return 'passed'
