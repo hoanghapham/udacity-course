@@ -45,8 +45,7 @@ insert_time_table = ("""
 copy_s3_to_table = """
     COPY public.{table}
     FROM '{s3_path}'
-    ACCESS_KEY_ID '{access_key}'
-    SECRET_ACCESS_KEY '{secret_key}'
+    IAM_ROLE 'arn:aws:iam::085234705655:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift'
     FORMAT AS JSON 'auto'
 """
 
@@ -59,6 +58,8 @@ CREATE TABLE public.artists (
     longitude numeric(18,0)
 );
 """
+
+drop_artists_table = "drop table if exists public.artists;"
 
 create_songplays_table = """
 CREATE TABLE public.songplays (
@@ -75,6 +76,8 @@ CREATE TABLE public.songplays (
 );
 """
 
+drop_songplays_table = "drop table if exists public.songplays;"
+
 create_songs_table = """
 CREATE TABLE public.songs (
     songid varchar(256) NOT NULL,
@@ -85,6 +88,8 @@ CREATE TABLE public.songs (
     CONSTRAINT songs_pkey PRIMARY KEY (songid)
 );
 """
+
+drop_songs_table = "drop table if exists public.songs;"
 
 create_time_table = """
 CREATE TABLE public."time" (
@@ -99,6 +104,8 @@ CREATE TABLE public."time" (
 ) ;
 """
 
+drop_time_table = "drop table if exists public.time;"
+
 create_users_table = """
 CREATE TABLE public.users (
     userid int4 NOT NULL,
@@ -109,6 +116,8 @@ CREATE TABLE public.users (
     CONSTRAINT users_pkey PRIMARY KEY (userid)
 );
 """
+
+drop_users_table = "drop table if exists public.users;"
 
 create_staging_events_table = """
 CREATE TABLE public.staging_events (
@@ -133,6 +142,8 @@ CREATE TABLE public.staging_events (
 );
 """
 
+drop_staging_events_table = "drop table if exists public.staging_events;"
+
 create_staging_songs_table = """
 CREATE TABLE public.staging_songs (
     num_songs int4,
@@ -148,20 +159,20 @@ CREATE TABLE public.staging_songs (
 );
 """
 
+drop_staging_songs_table = "drop table if exists public.staging_songs;"
+
 
 copy_staging_events_table = """
     COPY public.staging_events
     FROM 's3://udacity-dend/log_data'
-    ACCESS_KEY_ID '{access_key}'
-    SECRET_ACCESS_KEY '{secret_key}'
+    IAM_ROLE 'arn:aws:iam::085234705655:role/service-role/AmazonRedshift-CommandsAccessRole-20230119T001023'
     FORMAT AS JSON 'auto'
 """
 
 copy_staging_songs_table = """
     COPY public.staging_songs
     FROM 's3://udacity-dend/song_data'
-    ACCESS_KEY_ID '{access_key}'
-    SECRET_ACCESS_KEY '{secret_key}'
+    IAM_ROLE 'arn:aws:iam::085234705655:role/service-role/AmazonRedshift-CommandsAccessRole-20230119T001023'
     FORMAT AS JSON 'auto'
 """
 
@@ -185,35 +196,42 @@ class LoadConfig(ABC):
 
 class StageEventsTable(LoadConfig):
     table_name = 'staging_events'
+    drop_table = drop_staging_events_table
     create_table = create_staging_events_table
     insert_table = copy_staging_events_table
 
 class StageSongsTable(LoadConfig):
     table_name = 'staging_songs'
-    create_table = create_songs_table
+    drop_table = drop_staging_songs_table
+    create_table = create_staging_songs_table
     insert_table = copy_staging_songs_table
 
 class LoadUsersDimTable(LoadConfig):
     table_name = 'users'
+    drop_table = drop_users_table
     create_table = create_users_table
     insert_table = insert_users_table
 
 class LoadSongsDimTable(LoadConfig):
     table_name = 'songs'
+    drop_table = drop_songs_table
     create_table = create_songs_table
     insert_table = insert_songs_table
 
 class LoadArtistsDimTable(LoadConfig):
     table_name = 'artists'
+    drop_table = drop_artists_table
     create_table = create_artists_table
     insert_table = insert_artists_table
 
 class LoadTimeDimTable(LoadConfig):
     table_name = 'time'
+    drop_table = drop_time_table
     create_table = create_time_table
     insert_table = insert_time_table
 
 class LoadSongplaysFactTable(LoadConfig):
     table_name = 'songplays'
+    drop_table = drop_songplays_table
     create_table = create_songplays_table
     insert_table = insert_songplays_table
