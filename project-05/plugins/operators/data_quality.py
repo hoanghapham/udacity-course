@@ -70,5 +70,5 @@ class DataQualityOperator(BaseOperator):
             logger.error(f"Data quality check failed: {', '.join(failed_tests)}") 
             raise ValueError("Data quality check failed")
         else:
-            logger.info("Data quality check passed")           )
+            logger.info("Data quality check passed")
 
