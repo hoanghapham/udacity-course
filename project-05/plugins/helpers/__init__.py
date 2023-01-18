@@ -1,5 +1,22 @@
+from helpers.load_configs import (
+    StageEventsTable,
+    StageSongsTable,
+    LoadUsersDimTable,
+    LoadSongsDimTable,
+    LoadArtistsDimTable,
+    LoadTimeDimTable,
+    LoadSongplaysFactTable
+)
 from helpers.sql_queries import SqlQueries
 
 __all__ = [
-    'SqlQueries',
+    'StageEventsTable',
+    'StageSongsTable',
+    'LoadUsersDimTable',
+    'LoadSongsDimTable',
+    'LoadArtistsDimTable',
+    'LoadTimeDimTable',
+    'LoadSongplaysFactTable',
+    'SqlQueries'
+
 ]

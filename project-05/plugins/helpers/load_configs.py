@@ -182,6 +182,12 @@ class LoadConfig(ABC):
     @abstractmethod
     def table_name(self):
         pass
+    
+    @property
+    @abstractmethod
+    def drop_table(self):
+        pass
+
 
     @property
     @abstractmethod

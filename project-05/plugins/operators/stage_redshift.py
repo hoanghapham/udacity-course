@@ -2,11 +2,11 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
-from airflow.operators import PostgresOperator
+from helpers.load_configs import LoadConfig
 
-import logging
+from helpers.custom_logger import init_logger
 
-from helpers.sql_queries import StageQueries
+logger = init_logger(__file__)
 
 class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
@@ -17,7 +17,7 @@ class StageToRedshiftOperator(BaseOperator):
         s3_path = '',
         redshift_conn_id = 'redshift',
         aws_credentials_id = 'aws_credentials',
-        load_config = None,
+        load_config: LoadConfig = None,
         *args, **kwargs
     ):
 
@@ -34,15 +34,7 @@ class StageToRedshiftOperator(BaseOperator):
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        logging.info(f"Staging {self.load_config.table_name}...")
-
+        logger.info(f"Staging {self.load_config.table_name}...")
+        redshift.run(self.load_config.drop_table)
         redshift.run(self.load_config.create_table)
-        redshift.run(self.load_config.insert_table.format(
-            access_key=credentials.access_key, secret_key=credentials.secret_key))
-
-
-
-
-
-
-
+        redshift.run(self.load_config.insert_table)

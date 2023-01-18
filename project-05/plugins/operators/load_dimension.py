@@ -3,7 +3,7 @@ from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
 from helpers.custom_logger import init_logger
-from helpers.sql_queries import LoadConfig
+from helpers.load_configs import LoadConfig
 
 logger = init_logger(__file__)
 
@@ -26,7 +26,7 @@ class LoadDimensionOperator(BaseOperator):
         redshift = PostgresHook(self.redshift_conn_id)
         
         logger.info(f"Loading dimension table {self.load_config.table_name}...")
-        
+        redshift.run(self.load_config.drop_table)
         redshift.run(self.load_config.creat_table)
         redshift.run(self.load_config.copy_table)
 
