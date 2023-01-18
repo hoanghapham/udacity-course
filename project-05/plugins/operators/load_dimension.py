@@ -27,6 +27,6 @@ class LoadDimensionOperator(BaseOperator):
         
         logger.info(f"Loading dimension table {self.load_config.table_name}...")
         redshift.run(self.load_config.drop_table)
-        redshift.run(self.load_config.creat_table)
-        redshift.run(self.load_config.copy_table)
+        redshift.run(self.load_config.create_table)
+        redshift.run(self.load_config.insert_table)
 
