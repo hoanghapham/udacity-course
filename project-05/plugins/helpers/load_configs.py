@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 insert_songplays_table = ("""
-    SELECT
-            md5(events.sessionid || events.start_time) songplay_id,
+    INSERT INTO public.songplays (
+        SELECT
+            md5(songs.song_id || events.start_time) playid,
             events.start_time, 
             events.userid, 
             events.level, 
@@ -18,28 +19,42 @@ insert_songplays_table = ("""
         ON events.song = songs.title
             AND events.artist = songs.artist_name
             AND events.length = songs.duration
+        WHERE songs.song_id IS NOT NULL
+    )
 """)
 
 insert_users_table = ("""
-    SELECT distinct userid, firstname, lastname, gender, level
-    FROM staging_events
-    WHERE page='NextSong'
+    INSERT INTO public.users (
+        SELECT distinct userid, firstname, lastname, gender, level
+        FROM staging_events
+        WHERE page='NextSong'
+            AND userid IS NOT NULL
+    )
 """)
 
 insert_songs_table = ("""
-    SELECT distinct song_id, title, artist_id, year, duration
-    FROM staging_songs
+    INSERT INTO public.songs (
+        SELECT distinct song_id, title, artist_id, year, duration
+        FROM staging_songs
+    )
 """)
 
 insert_artists_table = ("""
-    SELECT distinct artist_id, artist_name, artist_location, artist_latitude, artist_longitude
-    FROM staging_songs
+    INSERT INTO public.artists (
+        SELECT  artist_id, artist_name, artist_location, artist_latitude, artist_longitude
+        FROM (
+            SELECT *, ROW_NUMBER() OVER (PARTITION BY artist_id) AS idx 
+            FROM staging_songs
+        ) WHERE idx = 1
+    )
 """)
 
 insert_time_table = ("""
-    SELECT start_time, extract(hour from start_time), extract(day from start_time), extract(week from start_time), 
-            extract(month from start_time), extract(year from start_time), extract(dayofweek from start_time)
-    FROM songplays
+    INSERT INTO public.time (
+        SELECT start_time, extract(hour from start_time), extract(day from start_time), extract(week from start_time), 
+                extract(month from start_time), extract(year from start_time), extract(dayofweek from start_time)
+        FROM songplays
+    )
 """)
 
 copy_s3_to_table = """
@@ -65,7 +80,7 @@ create_songplays_table = """
 CREATE TABLE public.songplays (
     playid varchar(32) NOT NULL,
     start_time timestamp NOT NULL,
-    userid int4 NOT NULL,
+    userid int4,
     "level" varchar(256),
     songid varchar(256),
     artistid varchar(256),
