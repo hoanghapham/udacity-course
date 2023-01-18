@@ -5,7 +5,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
                                 LoadDimensionOperator, DataQualityOperator)
 
-from plugins.helpers.sql_queries import (
+from plugins.helpers.load_configs import (
     StageEventsTable,
     StageSongsTable,
     LoadArtistsDimTable,
@@ -87,7 +87,7 @@ load_time_dimension_table = LoadDimensionOperator(
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
     dag=dag,
-    
+    redshift_conn_id='redshift'
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
@@ -95,9 +95,9 @@ end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 stage_logs_to_redshift >> load_songplays_table
 stage_songs_to_redshift >> load_songplays_table
 
-load_songplays_table >> load_song_dimension_table >> run_quality_checks
+load_songplays_table >> load_songs_dimension_table >> run_quality_checks
 load_songplays_table >> load_user_dimension_table >> run_quality_checks
-load_songplays_table >> load_artist_dimension_table >> run_quality_checks
+load_songplays_table >> load_artists_dimension_table >> run_quality_checks
 load_songplays_table >> load_time_dimension_table >> run_quality_checks
 
 run_quality_checks >> end_operator
