@@ -2,10 +2,12 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
-                                LoadDimensionOperator, DataQualityOperator)
+from operators.stage_redshift import StageToRedshiftOperator
+from operators.load_fact import LoadFactOperator
+from operators.load_dimension import LoadDimensionOperator
+from operators.data_quality import DataQualityOperator
 
-from plugins.helpers.load_configs import (
+from helpers.load_configs import (
     StageEventsTable,
     StageSongsTable,
     LoadArtistsDimTable,
@@ -20,13 +22,12 @@ from plugins.helpers.load_configs import (
 
 default_args = {
     'owner': 'udacity',
-    'start_date': datetime(2019, 1, 12),
+    'start_date': datetime(2023, 1, 17),
 }
 
-dag = DAG('udac_example_dag',
+dag = DAG('sparkfy_etl_v3',
           default_args=default_args,
-          description='Load and transform data in Redshift with Airflow',
-          schedule_interval='0 * * * *'
+          description='Load and transform data in Redshift with Airflow'
         )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
@@ -92,6 +93,8 @@ run_quality_checks = DataQualityOperator(
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
+start_operator >> stage_logs_to_redshift
+start_operator >> stage_songs_to_redshift
 stage_logs_to_redshift >> load_songplays_table
 stage_songs_to_redshift >> load_songplays_table
 
