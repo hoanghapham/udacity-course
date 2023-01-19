@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators.stage_redshift import StageToRedshiftOperator
@@ -18,13 +18,20 @@ from helpers.load_configs import (
 
 
 default_args = {
-    'owner': 'udacity',
-    'start_date': datetime(2023, 1, 17),
+    'owner': 'hoanghapham',
+    'start_date': datetime(2023, 1, 19),
+    'depends_on_past': True,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=1),
+    'catchup': True
+
+
 }
 
 dag = DAG('sparkfy_etl',
           default_args=default_args,
-          description='Load and transform data in Redshift with Airflow'
+          description='Load and transform data in Redshift with Airflow',
+          schedule='0 * * * *'
         )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
