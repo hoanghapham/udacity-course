@@ -7,7 +7,10 @@ from helpers.load_configs import (
     LoadTimeDimTable,
     LoadSongplaysFactTable
 )
+
 from helpers.sql_queries import SqlQueries
+
+from helpers.settings import LoadMode
 
 __all__ = [
     'StageEventsTable',
@@ -17,6 +20,6 @@ __all__ = [
     'LoadArtistsDimTable',
     'LoadTimeDimTable',
     'LoadSongplaysFactTable',
+    'LoadMode',
     'SqlQueries'
-
 ]

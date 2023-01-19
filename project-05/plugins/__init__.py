@@ -4,6 +4,7 @@ from airflow.plugins_manager import AirflowPlugin
 
 import operators
 import helpers
+from helpers import settings
 
 # Defining the plugin class
 class UdacityPlugin(AirflowPlugin):
@@ -17,3 +18,4 @@ class UdacityPlugin(AirflowPlugin):
     helpers = [
         helpers.SqlQueries
     ]
+    settings = [settings.LoadMode]

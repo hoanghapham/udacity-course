@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators.stage_redshift import StageToRedshiftOperator
@@ -16,15 +16,22 @@ from helpers.load_configs import (
     LoadSongplaysFactTable
 )
 
+from helpers.settings import LoadMode
+
 
 default_args = {
-    'owner': 'udacity',
-    'start_date': datetime(2023, 1, 17),
+    'owner': 'hoanghapham',
+    'start_date': datetime(2023, 1, 19),
+    'depends_on_past': True,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=1),
+    'catchup': True
 }
 
 dag = DAG('sparkfy_etl',
           default_args=default_args,
-          description='Load and transform data in Redshift with Airflow'
+          description='Load and transform data in Redshift with Airflow',
+          schedule_interval='0 * * * *'
         )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
@@ -58,28 +65,32 @@ load_user_dimension_table = LoadDimensionOperator(
     task_id='Load_users_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadUsersDimTable
+    load_config=LoadUsersDimTable,
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_songs_dimension_table = LoadDimensionOperator(
     task_id='Load_songs_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadSongsDimTable
+    load_config=LoadSongsDimTable,
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_artists_dimension_table = LoadDimensionOperator(
     task_id='Load_artists_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadArtistsDimTable
+    load_config=LoadArtistsDimTable,
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_time_dimension_table = LoadDimensionOperator(
     task_id='Load_time_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadTimeDimTable
+    load_config=LoadTimeDimTable,
+    mode=LoadMode.DELETE_INSERT
 )
 
 run_quality_checks = DataQualityOperator(
