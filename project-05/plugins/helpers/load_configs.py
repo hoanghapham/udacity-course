@@ -183,14 +183,14 @@ copy_staging_events_table = """
     COPY public.staging_events
     FROM 's3://udacity-dend/log_data'
     IAM_ROLE '{iam_role}'
-    FORMAT AS JSON 'auto'
+    FORMAT AS JSON 's3://udacity-dend/log_json_path.json'
 """
 
 copy_staging_songs_table = """
     COPY public.staging_songs
     FROM 's3://udacity-dend/song_data'
     IAM_ROLE '{iam_role}'
-    FORMAT AS JSON 'auto'
+    FORMAT AS JSON 'AUTO'
 """
 
 class LoadConfig(ABC):
