@@ -30,11 +30,17 @@ class LoadDimensionOperator(BaseOperator):
     def execute(self, context):
         redshift = PostgresHook(self.redshift_conn_id)
         
-        logger.info(f"Loading dimension table {self.load_config.table_name}...")
+        logger.info(f"Start loading dimension table {self.load_config.table_name}")
         
         if self.mode == LoadMode.DELETE_INSERT:
+            logger.info(f"Deleting table {self.load_config.table_name}...")
             redshift.run(self.load_config.drop_table)
         
+        logger.info(f"Creating table {self.load_config.table_name}...")
         redshift.run(self.load_config.create_table)
+
+        logger.info({F"Inserting data to table {self.load_config.table_name}..."})
         redshift.run(self.load_config.insert_table)
+
+        logger.info(f"Finished loading dimension table {self.load_config.table_name}.")
 
