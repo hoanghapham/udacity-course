@@ -1,3 +1,4 @@
+# This is not used since all of the queries are moved to load_config
 class SqlQueries:
     songplay_table_insert = ("""
         SELECT

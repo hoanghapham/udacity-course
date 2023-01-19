@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+# Group queries to delete, create and insert tables into LoadConfig objects
+
 insert_songplays_table = ("""
     INSERT INTO public.songplays (
         SELECT
@@ -60,7 +62,7 @@ insert_time_table = ("""
 copy_s3_to_table = """
     COPY public.{table}
     FROM '{s3_path}'
-    IAM_ROLE 'arn:aws:iam::085234705655:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift'
+    IAM_ROLE '{iam_role}'
     FORMAT AS JSON 'auto'
 """
 
@@ -216,42 +218,56 @@ class LoadConfig(ABC):
 
 
 class StageEventsTable(LoadConfig):
+    """LoadConfig for staging_events table.
+    """
     table_name = 'staging_events'
     drop_table = drop_staging_events_table
     create_table = create_staging_events_table
     insert_table = copy_staging_events_table
 
 class StageSongsTable(LoadConfig):
+    """LoadConfig for staging_songs table.
+    """
     table_name = 'staging_songs'
     drop_table = drop_staging_songs_table
     create_table = create_staging_songs_table
     insert_table = copy_staging_songs_table
 
 class LoadUsersDimTable(LoadConfig):
+    """LoadConfig for users table.
+    """
     table_name = 'users'
     drop_table = drop_users_table
     create_table = create_users_table
     insert_table = insert_users_table
 
 class LoadSongsDimTable(LoadConfig):
+    """LoadConfig for songs table.
+    """
     table_name = 'songs'
     drop_table = drop_songs_table
     create_table = create_songs_table
     insert_table = insert_songs_table
 
 class LoadArtistsDimTable(LoadConfig):
+    """LoadConfig for artists table.
+    """
     table_name = 'artists'
     drop_table = drop_artists_table
     create_table = create_artists_table
     insert_table = insert_artists_table
 
 class LoadTimeDimTable(LoadConfig):
+    """LoadConfig for time table.
+    """
     table_name = 'time'
     drop_table = drop_time_table
     create_table = create_time_table
     insert_table = insert_time_table
 
 class LoadSongplaysFactTable(LoadConfig):
+    """LoadConfig for songplays table.
+    """
     table_name = 'songplays'
     drop_table = drop_songplays_table
     create_table = create_songplays_table

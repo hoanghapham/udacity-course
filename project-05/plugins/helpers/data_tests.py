@@ -1,4 +1,3 @@
-
 check_unique_sql = """
     select
         {column},
@@ -23,6 +22,10 @@ check_has_data_sql = """
 """
 
 class DataTest:
+    """Run a data test SQL. 
+    If the SQL returns at least one record, flag the test as failed.
+    If it returns no result, flag the test as `passed`
+    """
 
     def __init__(self,redshift_hook, sql) -> None:
         self.sql = sql
@@ -37,18 +40,24 @@ class DataTest:
 
 
 class CheckUnique(DataTest):
+    """Check if the value of a column in a table is unique
+    """
 
     def __init__(self, redshift_hook, table, column) -> None:
         super().__init__(redshift_hook, check_unique_sql.format(table=table, column=column))
         self.test_name = f"{table}_{column}_unique"
 
 class CheckNotNull(DataTest):
+    """Check if there are any NULL in a column of a table
+    """
 
     def __init__(self, redshift_hook, table, column) -> None:
         super().__init__(redshift_hook, check_not_null_sql.format(table=table, column=column))
         self.test_name = f"{table}_{column}_not_null"
 
 class CheckHasData(DataTest):
+    """Check if the table has data or not
+    """
 
     def __init__(self, redshift_hook, table) -> None:
         super().__init__(redshift_hook, check_has_data_sql.format(table=table))

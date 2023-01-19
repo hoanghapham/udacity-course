@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import os
+from datetime import datetime
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators.stage_redshift import StageToRedshiftOperator
@@ -17,15 +16,13 @@ from helpers.load_configs import (
     LoadSongplaysFactTable
 )
 
-# AWS_KEY = os.environ.get('AWS_KEY')
-# AWS_SECRET = os.environ.get('AWS_SECRET')
 
 default_args = {
     'owner': 'udacity',
     'start_date': datetime(2023, 1, 17),
 }
 
-dag = DAG('sparkfy_etl_v3',
+dag = DAG('sparkfy_etl',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow'
         )
@@ -95,6 +92,7 @@ end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
 start_operator >> stage_logs_to_redshift
 start_operator >> stage_songs_to_redshift
+
 stage_logs_to_redshift >> load_songplays_table
 stage_songs_to_redshift >> load_songplays_table
 

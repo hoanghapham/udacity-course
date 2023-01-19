@@ -9,6 +9,8 @@ from helpers.custom_logger import init_logger
 logger = init_logger(__file__)
 
 class StageToRedshiftOperator(BaseOperator):
+    """Copy data from S3 to Redshift
+    """
     ui_color = '#358140'
 
     @apply_defaults
@@ -37,4 +39,4 @@ class StageToRedshiftOperator(BaseOperator):
         logger.info(f"Staging {self.load_config.table_name}...")
         redshift.run(self.load_config.drop_table)
         redshift.run(self.load_config.create_table)
-        redshift.run(self.load_config.insert_table)
+        redshift.run(self.load_config.insert_table.format(iam_role=credentials.secret_key))
