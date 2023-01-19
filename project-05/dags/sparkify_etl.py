@@ -22,10 +22,11 @@ from helpers.settings import LoadMode
 default_args = {
     'owner': 'hoanghapham',
     'start_date': datetime(2023, 1, 19),
-    'depends_on_past': True,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1),
-    'catchup': True
+    'depends_on_past': False,
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5),
+    'catchup': False,
+    'email_on_retry': False
 }
 
 dag = DAG('sparkfy_etl',
@@ -101,15 +102,16 @@ run_quality_checks = DataQualityOperator(
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
-start_operator >> stage_logs_to_redshift
-start_operator >> stage_songs_to_redshift
+start_operator >> [
+    stage_logs_to_redshift, 
+    stage_songs_to_redshift
+] >> load_songplays_table
 
-stage_logs_to_redshift >> load_songplays_table
-stage_songs_to_redshift >> load_songplays_table
-
-load_songplays_table >> load_songs_dimension_table >> run_quality_checks
-load_songplays_table >> load_user_dimension_table >> run_quality_checks
-load_songplays_table >> load_artists_dimension_table >> run_quality_checks
-load_songplays_table >> load_time_dimension_table >> run_quality_checks
+load_songplays_table >> [
+    load_songs_dimension_table, 
+    load_user_dimension_table, 
+    load_artists_dimension_table, 
+    load_time_dimension_table
+] >> run_quality_checks 
 
 run_quality_checks >> end_operator
