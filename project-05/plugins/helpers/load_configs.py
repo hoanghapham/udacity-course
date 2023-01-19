@@ -27,10 +27,15 @@ insert_songplays_table = ("""
 
 insert_users_table = ("""
     INSERT INTO public.users (
-        SELECT distinct userid, firstname, lastname, gender, level
-        FROM staging_events
-        WHERE page='NextSong'
-            AND userid IS NOT NULL
+        SELECT userid, firstname, lastname, gender, level
+        FROM (
+            SELECT
+                userid, firstname, lastname, gender, level,
+                ROW_NUMBER() OVER (PARTITION BY userid ORDER BY ts DESC) AS idx
+            FROM staging_events
+            WHERE page='NextSong'
+                AND userid IS NOT NULL
+        ) WHERE idx = 1
     )
 """)
 
@@ -190,7 +195,7 @@ copy_staging_songs_table = """
     COPY public.staging_songs
     FROM 's3://udacity-dend/song_data'
     IAM_ROLE '{iam_role}'
-    FORMAT AS JSON 'AUTO'
+    FORMAT AS JSON 'auto'
 """
 
 class LoadConfig(ABC):
