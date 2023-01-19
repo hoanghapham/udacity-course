@@ -182,14 +182,14 @@ drop_staging_songs_table = "drop table if exists public.staging_songs;"
 copy_staging_events_table = """
     COPY public.staging_events
     FROM 's3://udacity-dend/log_data'
-    IAM_ROLE 'arn:aws:iam::085234705655:role/service-role/AmazonRedshift-CommandsAccessRole-20230119T001023'
+    IAM_ROLE '{iam_role}'
     FORMAT AS JSON 'auto'
 """
 
 copy_staging_songs_table = """
     COPY public.staging_songs
     FROM 's3://udacity-dend/song_data'
-    IAM_ROLE 'arn:aws:iam::085234705655:role/service-role/AmazonRedshift-CommandsAccessRole-20230119T001023'
+    IAM_ROLE '{iam_role}'
     FORMAT AS JSON 'auto'
 """
 
