@@ -39,15 +39,15 @@ class DataQualityOperator(BaseOperator):
         failed_tests = []
 
         # Iterate through all tests, execute, store test result, and pick out failed tests
-        for test_name, test_sql, expected_result in self.data_tests:
+        for test in self.data_tests:
             
-            records = redshift.get_records(test_sql)
-            is_passed = (records[0][0] == expected_result)
+            records = redshift.get_records(test['test_sql'])
+            is_passed = (len(records) == 0)
 
-            test_results.append((test_name, is_passed))
+            test_results.append((test['test_name'], is_passed))
 
             if not is_passed:
-                failed_tests.append(test_name, is_passed)
+                failed_tests.append(test['test_name'])
 
         if any(failed_tests):
             logger.error(f"Data quality checks failed: {', '.join(failed_tests)}") 
