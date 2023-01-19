@@ -3,12 +3,9 @@
 In this project, we will build an Airflow pipeline for a fictional music-streaming service called Sparkify.
 This repo is meant to be run on Udacity's provided infrastructure, so there won't be any guide on how to set up Airflow.
 
-
 ## Architecture
 
 ![](./images/Airflow.png)
-
-
 
 ## Pipeline description
 
@@ -32,7 +29,3 @@ For the DAG to run:
     - `aws_credentials`: Get the **IAM role's ARN** and create an Amazon Web Service connection in the Airflow server, with ID `aws_credentials`. Enter the ARN into both login and password field.
 
 > WARNING: Highly recommend using IAM role authentication method instead of AWS access key, because the authentication parameter will be inserted to the S3 to Redshift `COPY` sql, and the secret will be exposed in the log.
-
-## Notes
-- This project includes unique, not-null and has-data tests for all tables. 
-- Not all tests will pass, because the source log data's `sessionid` and `userid` columns have no data.

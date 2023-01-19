@@ -2,7 +2,6 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from helpers.custom_logger import init_logger
-from helpers.data_tests import CheckHasData, CheckUnique, CheckNotNull
 
 logger = init_logger(__file__)
 
@@ -23,45 +22,36 @@ class DataQualityOperator(BaseOperator):
     def __init__(
         self, 
         redshift_conn_id: str, 
+        data_tests,
         *args, 
         **kwargs
     ):
         super(DataQualityOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
+        self.data_tests = data_tests
 
     def execute(self, context):
-        redshift_hook = PostgresHook(self.redshift_conn_id)
+        redshift = PostgresHook(self.redshift_conn_id)
         
-        # Specify tests for all tables
-        tests = [
-            CheckUnique(redshift_hook, "artists", "artistid"),
-            CheckNotNull(redshift_hook, "artists", "artistid"),
-            CheckHasData(redshift_hook, "artists"),
+        logger.info("Running data quality tests...") 
+        
+        test_results = []
+        failed_tests = []
+
+        # Iterate through all tests, execute, store test result, and pick out failed tests
+        for test in self.data_tests:
             
-            CheckUnique(redshift_hook, "songplays", "playid"),
-            CheckNotNull(redshift_hook, "songplays", "playid"),
-            CheckHasData(redshift_hook, "songplays"),
+            records = redshift.get_records(test['test_sql'])
+            is_passed = (len(records) == 0)
 
-            CheckUnique(redshift_hook, "songs", "songid"),
-            CheckNotNull(redshift_hook, "songs", "songid"),
-            CheckHasData(redshift_hook, "songs"),
+            test_results.append((test['test_name'], is_passed))
 
-            CheckUnique(redshift_hook, "users", "userid"),
-            CheckNotNull(redshift_hook, "users", "userid"),
-            CheckHasData(redshift_hook, "users"),
-
-            CheckUnique(redshift_hook, "time", "start_time"),
-            CheckNotNull(redshift_hook, "time", "start_time"),
-            CheckHasData(redshift_hook, "time")
-        ]
-
-        # Iterate through all tests, execute, and pick out failed tests
-        results = [(i.test_name, i.execute()) for i in tests]
-        failed_tests = [test for test, result in results if result == 'failed']
+            if not is_passed:
+                failed_tests.append(test['test_name'])
 
         if any(failed_tests):
-            logger.error(f"Data quality check failed: {', '.join(failed_tests)}") 
-            raise ValueError("Data quality check failed")
+            logger.error(f"Data quality checks failed: {', '.join(failed_tests)}") 
+            raise ValueError("Data quality checks failed.")
         else:
-            logger.info("Data quality check passed")
+            logger.info("All data quality checks passed.")
 

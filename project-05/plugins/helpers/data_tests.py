@@ -9,8 +9,9 @@ check_unique_sql = """
 
 check_not_null_sql = """
     select
-        count(case when {column} is null then 1 else null end) as cnt
+        count(*) as cnt
     from {table}
+    where {column} is null
     having cnt > 0
 """
 
@@ -18,7 +19,7 @@ check_has_data_sql = """
     select 
         count(*) as cnt
     from {table}
-    having cnt == 0
+    having cnt = 0
 """
 
 class DataTest:
@@ -62,3 +63,27 @@ class CheckHasData(DataTest):
     def __init__(self, redshift_hook, table) -> None:
         super().__init__(redshift_hook, check_has_data_sql.format(table=table))
         self.test_name = f"{table}_has_data"
+
+
+data_tests = [
+    {'test_name': 'artists_artistid_unique', 'test_sql': check_unique_sql.format(table='artists', column='artistid')},
+    {'test_name': 'artists_artistid_not_null', 'test_sql': check_not_null_sql.format(table='artists', column='artistid')},
+    {'test_name': 'artists_has_data', 'test_sql': check_has_data_sql.format(table='artists')},
+
+    {'test_name': 'songplays_playid_unique', 'test_sql': check_unique_sql.format(table='songplays', column='playid')},
+    {'test_name': 'songplays_playid_not_null', 'test_sql': check_not_null_sql.format(table='songplays', column='playid')},
+    {'test_name': 'songplays_has_data', 'test_sql': check_has_data_sql.format(table='songplays')},
+    
+    {'test_name': 'songs_songid_unique', 'test_sql': check_unique_sql.format(table='songs', column='songid')},
+    {'test_name': 'songs_songid_not_null', 'test_sql': check_not_null_sql.format(table='songs', column='songid')},
+    {'test_name': 'songs_has_data', 'test_sql': check_has_data_sql.format(table='songs')},
+    
+    {'test_name': 'users_userid_unique', 'test_sql': check_unique_sql.format(table='users', column='userid')},
+    {'test_name': 'users_userid_not_null', 'test_sql': check_not_null_sql.format(table='users', column='userid')},
+    {'test_name': 'users_has_data', 'test_sql': check_has_data_sql.format(table='users')},
+    
+    {'test_name': 'time_start_time_unique', 'test_sql': check_unique_sql.format(table='time', column='start_time')},
+    {'test_name': 'time_start_time_not_null', 'test_sql': check_not_null_sql.format(table='time', column='start_time')},
+    {'test_name': 'time_has_data', 'test_sql': check_has_data_sql.format(table='time')}
+    
+]

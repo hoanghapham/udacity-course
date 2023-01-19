@@ -36,7 +36,14 @@ class StageToRedshiftOperator(BaseOperator):
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        logger.info(f"Staging {self.load_config.table_name}...")
+        logger.info(f"Start staging {self.load_config.table_name}...")
+        logger.info(f"Deleting table {self.load_config.table_name}...")
         redshift.run(self.load_config.drop_table)
+
+        logger.info(f"Creating table {self.load_config.table_name}...")
         redshift.run(self.load_config.create_table)
+
+        logger.info(f"Inserting data into table {self.load_config.table_name}...")
         redshift.run(self.load_config.insert_table.format(iam_role=credentials.secret_key))
+
+        logger.info(f"Finished staging table {self.load_config.table_name}...")
