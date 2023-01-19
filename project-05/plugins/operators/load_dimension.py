@@ -2,15 +2,11 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
-import enum
 from helpers.custom_logger import init_logger
 from helpers.load_configs import LoadConfig
+from helpers.settings import LoadMode
 
 logger = init_logger(__file__)
-
-class Mode(enum.Enum):
-    APPEND_ONLY = "APPEND_ONLY"
-    DELETE_INSERT = "DELETE_INSERT"
 
 class LoadDimensionOperator(BaseOperator):
 
@@ -21,7 +17,7 @@ class LoadDimensionOperator(BaseOperator):
             self,
             redshift_conn_id="",
             load_config: LoadConfig = None,
-            mode: Mode = Mode.DELETE_INSERT,
+            mode: LoadMode = LoadMode.DELETE_INSERT,
             *args, 
             **kwargs
         ):
@@ -36,7 +32,7 @@ class LoadDimensionOperator(BaseOperator):
         
         logger.info(f"Loading dimension table {self.load_config.table_name}...")
         
-        if self.mode == Mode.DELETE_INSERT:
+        if self.mode == LoadMode.DELETE_INSERT:
             redshift.run(self.load_config.drop_table)
         
         redshift.run(self.load_config.create_table)

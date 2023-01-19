@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators.stage_redshift import StageToRedshiftOperator
 from operators.load_fact import LoadFactOperator
-from operators.load_dimension import LoadDimensionOperator, Mode
+from operators.load_dimension import LoadDimensionOperator
 from operators.data_quality import DataQualityOperator
 
 from helpers.load_configs import (
@@ -16,6 +16,8 @@ from helpers.load_configs import (
     LoadSongplaysFactTable
 )
 
+from helpers.settings import LoadMode
+
 
 default_args = {
     'owner': 'hoanghapham',
@@ -24,14 +26,12 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
     'catchup': True
-
-
 }
 
 dag = DAG('sparkfy_etl',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
-          schedule='0 * * * *'
+          schedule_interval='0 * * * *'
         )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
@@ -66,7 +66,7 @@ load_user_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id='redshift',
     load_config=LoadUsersDimTable,
-    mode=Mode.DELETE_INSERT
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_songs_dimension_table = LoadDimensionOperator(
@@ -74,7 +74,7 @@ load_songs_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id='redshift',
     load_config=LoadSongsDimTable,
-    mode=Mode.DELETE_INSERT
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_artists_dimension_table = LoadDimensionOperator(
@@ -82,7 +82,7 @@ load_artists_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id='redshift',
     load_config=LoadArtistsDimTable,
-    mode=Mode.DELETE_INSERT
+    mode=LoadMode.DELETE_INSERT
 )
 
 load_time_dimension_table = LoadDimensionOperator(
@@ -90,7 +90,7 @@ load_time_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id='redshift',
     load_config=LoadTimeDimTable,
-    mode=Mode.DELETE_INSERT
+    mode=LoadMode.DELETE_INSERT
 )
 
 run_quality_checks = DataQualityOperator(

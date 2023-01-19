@@ -272,3 +272,4 @@ class LoadSongplaysFactTable(LoadConfig):
     drop_table = drop_songplays_table
     create_table = create_songplays_table
     insert_table = insert_songplays_table
+
