@@ -13,10 +13,12 @@ class LoadFactOperator(BaseOperator):
 
     @apply_defaults
     def __init__(
-        self,
-        redshift_conn_id="",
-        load_config: LoadConfig = None,
-        *args, **kwargs):
+            self,
+            redshift_conn_id="",
+            load_config: LoadConfig = None,
+            *args, 
+            **kwargs
+        ):
 
         super(LoadFactOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id

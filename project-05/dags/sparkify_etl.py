@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators.stage_redshift import StageToRedshiftOperator
 from operators.load_fact import LoadFactOperator
-from operators.load_dimension import LoadDimensionOperator
+from operators.load_dimension import LoadDimensionOperator, Mode
 from operators.data_quality import DataQualityOperator
 
 from helpers.load_configs import (
@@ -65,28 +65,32 @@ load_user_dimension_table = LoadDimensionOperator(
     task_id='Load_users_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadUsersDimTable
+    load_config=LoadUsersDimTable,
+    mode=Mode.DELETE_INSERT
 )
 
 load_songs_dimension_table = LoadDimensionOperator(
     task_id='Load_songs_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadSongsDimTable
+    load_config=LoadSongsDimTable,
+    mode=Mode.DELETE_INSERT
 )
 
 load_artists_dimension_table = LoadDimensionOperator(
     task_id='Load_artists_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadArtistsDimTable
+    load_config=LoadArtistsDimTable,
+    mode=Mode.DELETE_INSERT
 )
 
 load_time_dimension_table = LoadDimensionOperator(
     task_id='Load_time_dim_table',
     dag=dag,
     redshift_conn_id='redshift',
-    load_config=LoadTimeDimTable
+    load_config=LoadTimeDimTable,
+    mode=Mode.DELETE_INSERT
 )
 
 run_quality_checks = DataQualityOperator(
